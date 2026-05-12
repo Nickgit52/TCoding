@@ -26,6 +26,8 @@ Sierra Chart (Windows/Parallels)
                             pulse_report.py → iTerm2 Terminal
 ```
 
+**Cross-pipeline note (Path B, 2026-05-12).** Pulse now also serves as a `.scid` cache for Eagle's batch pipeline. Eagle's `find_scid()` order is Sierra → `Pulse/Data/Scid_Data/` → `/Volumes/Sam128/TC_Sam128/`. Practical effect: Pulse's daily `sync` keeps Eagle's active-contract reads fresh without Eagle running its own copy step. Pulse itself is unchanged — same scripts, same outputs.
+
 ## Scripts
 
 | Script | Command | Role |

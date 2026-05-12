@@ -165,25 +165,26 @@ Sierra holds only the active 6 GC+NQ contracts plus dead date-style duplicates f
 
 ## 8. Disaster recovery
 
-### Reproducible (no backup required)
+### Replicated via GitHub (since 2026-05-12)
 
-- All derived artifacts: candles, features, reports, parquets-from-.scid
-- Recovery: re-run the pipeline scripts from upstream data
-- Cost: minutes to ~1 hour for full Eagle rebuild
+The full TCoding tree is version-controlled at `github.com/Nickgit52/TCoding` (private monorepo). Covers all code (Eagle + Pulse scripts), all governance docs (CLAUDE.md, TC_Main.md, TC_Data.md, Abbreviation.md, Roll.csv, Nick_Typo.csv), session journals (TC_JOURNAL/), and the operator-review queue (TC_REVIEW/). Cadence: per `git push`. Disaster recovery for these layers = `git clone`.
 
-### Irrecoverable (must be backed up)
+### Reproducible from upstream data
 
-- **`/Volumes/Sam128/TC_Sam128/*.scid`** — the 16 historical contracts. Sierra has purged them; if Sam128 fails, the 2.5 years of historical NQ + 2.5 years of historical GC are **gone**.
-- `Pulse/Data/Ticks_Parquet_Training/` — derived from those .scid, so technically reproducible IF the .scid still exist.
-- `TC_JOURNAL/` session journals — small, but contain trading history and decisions.
+- Eagle derived artifacts: candles, features, reports — re-run the pipeline scripts.
+- Pulse derived artifacts: Flux_Data, Intel_Data — re-run `maj` (bridge + vp + inst + market).
+- Cost: minutes to ~1 hour for a full Eagle rebuild.
 
-### Backup recommendation
+### Irrecoverable (still needs separate backup)
 
-- TC_Sam128 .scid files: replicate to a second physical disk (cloud or external). Total ~13 GB.
-- `TC_JOURNAL/`: replicate (git is acceptable; small text files).
-- Other artifacts: reproducible, no backup required.
+- **`/Volumes/Sam128/TC_Sam128/*.scid`** — the 16 historical contracts (~13 GB). Sierra has purged them; if Sam128 fails, the 2.5 years of historical NQ + 2.5 years of historical GC are **gone**. Too large for GitHub free tier (100 MB file limit; the 1.4 GB NQ files in particular).
+- `Pulse/Data/Ticks_Parquet_Training/` — 1.7 GB on Mac internal. Derived from the .scid, so reproducible IF the .scid survive. Also too large for GitHub.
 
-Backup cadence: monthly snapshot sufficient for .scid (changes limited to the active 6 contracts via `sync`).
+### Backup recommendation (.scid archive only — everything else is already replicated)
+
+- `TC_Sam128/*.scid`: replicate the 13 GB to a second physical disk (cloud, external drive, or partner Mac).
+- Cadence: monthly snapshot sufficient — only the active 6 contracts grow via Pulse `sync`, and the 16 historical contracts never change.
+- Recovery test: occasionally try a `--full` rebuild from a restored backup to confirm the archive is readable.
 
 ---
 
