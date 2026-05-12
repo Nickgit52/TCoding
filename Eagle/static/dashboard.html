@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eagle — Trading Dashboard</title>
+    <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #0a0a0f;
+            color: #c8ccd4;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+            overflow: hidden;
+        }
+
+        /* ── Header ─────────────────────────────────────────── */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: #12121a;
+            border-bottom: 1px solid #1e1e2e;
+        }
+
+        .header h1 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e8e8ef;
+            letter-spacing: 1.5px;
+        }
+
+        .header h1 span { color: #f0b429; }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 6px 14px;
+            border: 1px solid #2a2a3a;
+            border-radius: 6px;
+            background: #16161f;
+            color: #8888a0;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn:hover { border-color: #f0b429; color: #f0b429; }
+        .btn.active { background: #f0b429; color: #0a0a0f; border-color: #f0b429; font-weight: 600; }
+
+        /* ── Status bar ─────────────────────────────────────── */
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 8px 20px;
+            background: #0e0e16;
+            border-bottom: 1px solid #1a1a28;
+            font-size: 12px;
+        }
+
+        .status-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #444;
+            display: inline-block;
+            margin-right: 4px;
+        }
+
+        .status-dot.live { background: #22c55e; animation: pulse 2s infinite; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .dalton-levels {
+            display: flex;
+            gap: 16px;
+            margin-left: auto;
+        }
+
+        .dalton-level {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .dalton-level .label { color: #666; margin-right: 4px; }
+        .vah-val { color: #3b82f6; }
+        .poc-val { color: #f0b429; }
+        .val-val { color: #ef4444; }
+
+        /* ── Chart container ────────────────────────────────── */
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 90px);
+        }
+
+        #chart { width: 100%; height: 100%; }
+
+        /* ── Volume delta bar ───────────────────────────────── */
+        .last-info {
+            position: absolute;
+            top: 12px;
+            left: 16px;
+            z-index: 10;
+            font-size: 24px;
+            font-weight: 600;
+            color: #e8e8ef;
+        }
+
+        .last-info .delta {
+            font-size: 13px;
+            font-weight: 400;
+            margin-left: 8px;
+        }
+
+        .delta.positive { color: #22c55e; }
+        .delta.negative { color: #ef4444; }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <h1><span>EAGLE</span> — Dashboard</h1>
+    <div class="controls">
+        <button class="btn active" data-symbol="GC">GC Gold</button>
+        <button class="btn" data-symbol="NQ">NQ Nasdaq</button>
+        <span style="color:#333; margin: 0 4px;">|</span>
+        <button class="btn active" data-tf="1">1m</button>
+        <button class="btn" data-tf="5">5m</button>
+        <button class="btn" data-tf="15">15m</button>
+        <button class="btn" data-tf="60">1H</button>
+    </div>
+</div>
+
+<!-- Status bar -->
+<div class="status-bar">
+    <span><span class="status-dot" id="ws-dot"></span> <span id="ws-status">Déconnecté</span></span>
+    <span id="tick-count" style="color:#555;">—</span>
+    <!-- Dalton levels (désactivé — à réactiver quand le calcul sera intraday)
+    <div class="dalton-levels">
+        <span class="dalton-level"><span class="label">VAH</span><span class="vah-val" id="vah-val">—</span></span>
+        <span class="dalton-level"><span class="label">POC</span><span class="poc-val" id="poc-val">—</span></span>
+        <span class="dalton-level"><span class="label">VAL</span><span class="val-val" id="val-val">—</span></span>
+    </div>
+    -->
+</div>
+
+<!-- Chart -->
+<div class="chart-wrapper">
+    <div class="last-info">
+        <span id="last-price">—</span>
+        <span class="delta" id="last-delta"></span>
+    </div>
+    <div id="chart"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════════════
+
+let currentSymbol = 'GC';
+let currentTF = 1;
+let chart = null;
+let candleSeries = null;
+let volumeSeries = null;
+let pocLine = null;
+let vahLine = null;
+let valLine = null;
+let ws = null;
+let tickCount = 0;
+
+// Live candle builder
+let liveCandle = null;
+let liveBucket = null;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CHART SETUP
+// ═══════════════════════════════════════════════════════════════════════════
+
+function initChart() {
+    const container = document.getElementById('chart');
+
+    chart = LightweightCharts.createChart(container, {
+        layout: {
+            background: { type: 'solid', color: '#0a0a0f' },
+            textColor: '#666',
+            fontSize: 11,
+        },
+        grid: {
+            vertLines: { color: '#111118' },
+            horzLines: { color: '#111118' },
+        },
+        crosshair: {
+            mode: LightweightCharts.CrosshairMode.Normal,
+            vertLine: { color: '#f0b42940', labelBackgroundColor: '#f0b429' },
+            horzLine: { color: '#f0b42940', labelBackgroundColor: '#f0b429' },
+        },
+        rightPriceScale: {
+            borderColor: '#1a1a28',
+            scaleMargins: { top: 0.1, bottom: 0.25 },
+        },
+        timeScale: {
+            borderColor: '#1a1a28',
+            timeVisible: true,
+            secondsVisible: false,
+        },
+    });
+
+    candleSeries = chart.addCandlestickSeries({
+        upColor: '#22c55e',
+        downColor: '#ef4444',
+        borderUpColor: '#22c55e',
+        borderDownColor: '#ef4444',
+        wickUpColor: '#22c55e80',
+        wickDownColor: '#ef444480',
+    });
+
+    volumeSeries = chart.addHistogramSeries({
+        color: '#26a69a',
+        priceFormat: { type: 'volume' },
+        priceScaleId: 'volume',
+        scaleMargins: { top: 0.8, bottom: 0 },
+    });
+
+    chart.priceScale('volume').applyOptions({
+        scaleMargins: { top: 0.8, bottom: 0 },
+    });
+
+    // Resize
+    const ro = new ResizeObserver(() => {
+        chart.applyOptions({
+            width: container.clientWidth,
+            height: container.clientHeight,
+        });
+    });
+    ro.observe(container);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DATA LOADING
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function loadCandles(symbol) {
+    try {
+        const resp = await fetch(`/api/candles/${symbol}?tf=${currentTF}`);
+        const data = await resp.json();
+
+        if (!data.length) {
+            console.warn(`Pas de données pour ${symbol}`);
+            return;
+        }
+
+        // Bougies
+        candleSeries.setData(data.map(c => ({
+            time: c.time,
+            open: c.open,
+            high: c.high,
+            low: c.low,
+            close: c.close,
+        })));
+
+        // Volume avec couleur delta
+        volumeSeries.setData(data.map(c => ({
+            time: c.time,
+            value: c.volume,
+            color: c.delta >= 0 ? '#22c55e30' : '#ef444430',
+        })));
+
+        // Dernier prix
+        const last = data[data.length - 1];
+        document.getElementById('last-price').textContent = last.close.toFixed(2);
+        const deltaEl = document.getElementById('last-delta');
+        deltaEl.textContent = `Delta: ${last.delta > 0 ? '+' : ''}${last.delta}`;
+        deltaEl.className = `delta ${last.delta >= 0 ? 'positive' : 'negative'}`;
+
+        document.getElementById('tick-count').textContent = `${data.length} bougies`;
+
+    } catch (err) {
+        console.error('Erreur chargement bougies:', err);
+    }
+}
+
+async function loadDalton(symbol) {
+    try {
+        const resp = await fetch(`/api/dalton/${symbol}`);
+        const d = await resp.json();
+
+        if (!d.poc) return;
+
+        // Mettre à jour la barre de statut
+        document.getElementById('vah-val').textContent = d.vah.toFixed(2);
+        document.getElementById('poc-val').textContent = d.poc.toFixed(2);
+        document.getElementById('val-val').textContent = d.val.toFixed(2);
+
+        // Supprimer les anciennes lignes
+        if (pocLine) candleSeries.removePriceLine(pocLine);
+        if (vahLine) candleSeries.removePriceLine(vahLine);
+        if (valLine) candleSeries.removePriceLine(valLine);
+
+        // POC — ligne dorée
+        pocLine = candleSeries.createPriceLine({
+            price: d.poc,
+            color: '#f0b429',
+            lineWidth: 2,
+            lineStyle: LightweightCharts.LineStyle.Solid,
+            axisLabelVisible: true,
+            title: 'POC',
+        });
+
+        // VAH — ligne bleue
+        vahLine = candleSeries.createPriceLine({
+            price: d.vah,
+            color: '#3b82f6',
+            lineWidth: 1,
+            lineStyle: LightweightCharts.LineStyle.Dashed,
+            axisLabelVisible: true,
+            title: 'VAH',
+        });
+
+        // VAL — ligne rouge
+        valLine = candleSeries.createPriceLine({
+            price: d.val,
+            color: '#ef4444',
+            lineWidth: 1,
+            lineStyle: LightweightCharts.LineStyle.Dashed,
+            axisLabelVisible: true,
+            title: 'VAL',
+        });
+
+    } catch (err) {
+        console.error('Erreur chargement Dalton:', err);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// WEBSOCKET (Live ticks)
+// ═══════════════════════════════════════════════════════════════════════════
+
+function connectWS() {
+    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    ws = new WebSocket(`${proto}//${location.host}/ws`);
+
+    ws.onopen = () => {
+        document.getElementById('ws-dot').classList.add('live');
+        document.getElementById('ws-status').textContent = 'Live';
+    };
+
+    ws.onclose = () => {
+        document.getElementById('ws-dot').classList.remove('live');
+        document.getElementById('ws-status').textContent = 'Déconnecté';
+        // Reconnexion auto
+        setTimeout(connectWS, 3000);
+    };
+
+    ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.type !== 'tick' || msg.symbol !== currentSymbol) return;
+
+        tickCount++;
+        document.getElementById('tick-count').textContent = `${tickCount} ticks live`;
+
+        // Mettre à jour le prix affiché
+        document.getElementById('last-price').textContent = msg.price.toFixed(2);
+
+        // Construire la bougie live (UTC)
+        const dt = new Date(msg.time.replace(' ', 'T') + 'Z');
+        const bucketMin = Math.floor(dt.getUTCMinutes() / currentTF) * currentTF;
+        const bucketTime = Math.floor(Date.UTC(
+            dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate(),
+            dt.getUTCHours(), bucketMin, 0
+        ) / 1000);
+
+        if (liveBucket !== bucketTime) {
+            liveBucket = bucketTime;
+            liveCandle = {
+                time: bucketTime,
+                open: msg.price,
+                high: msg.price,
+                low: msg.price,
+                close: msg.price,
+            };
+        } else {
+            liveCandle.high = Math.max(liveCandle.high, msg.price);
+            liveCandle.low = Math.min(liveCandle.low, msg.price);
+            liveCandle.close = msg.price;
+        }
+
+        candleSeries.update(liveCandle);
+    };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// UI CONTROLS
+// ═══════════════════════════════════════════════════════════════════════════
+
+function switchSymbol(symbol) {
+    currentSymbol = symbol;
+    // Update buttons
+    document.querySelectorAll('[data-symbol]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.symbol === symbol);
+    });
+    loadCandles(symbol);
+    // loadDalton(symbol);  // Désactivé — à réactiver avec calcul intraday
+    liveCandle = null;
+    liveBucket = null;
+    tickCount = 0;
+}
+
+function switchTimeframe(tf) {
+    currentTF = parseInt(tf);
+    document.querySelectorAll('[data-tf]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tf === tf);
+    });
+    // Recharger les bougies (le serveur devrait supporter les TF)
+    loadCandles(currentSymbol);
+    liveCandle = null;
+    liveBucket = null;
+}
+
+// Event listeners
+document.querySelectorAll('[data-symbol]').forEach(btn => {
+    btn.addEventListener('click', () => switchSymbol(btn.dataset.symbol));
+});
+
+document.querySelectorAll('[data-tf]').forEach(btn => {
+    btn.addEventListener('click', () => switchTimeframe(btn.dataset.tf));
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════════════
+
+initChart();
+loadCandles(currentSymbol);
+loadDalton(currentSymbol);
+connectWS();
+
+// Rafraîchir les bougies depuis le serveur toutes les 3 secondes
+setInterval(() => loadCandles(currentSymbol), 3000);
+</script>
+</body>
+</html>

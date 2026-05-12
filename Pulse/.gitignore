@@ -1,0 +1,32 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+
+# Données — reproductibles depuis Sierra Chart
+Data/Scid_Data/
+Data/Live_Data/
+Data/Flux_Data/
+Data/Intel_Data/
+Data/Ticks_Parquet_Training/
+
+# Fichiers d'état (regénérés à chaque sync/bridge)
+Data/contracts.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log

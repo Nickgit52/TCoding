@@ -1,0 +1,41 @@
+symbol,contract,expected_roll_date,actual_roll_date,jump_pct,status,notes
+GC,GCG24,2024-01-26,,,historical,
+GC,GCJ24,2024-03-26,,,historical,
+GC,GCM24,2024-05-28,,,historical,
+GC,GCQ24,2024-07-26,,,historical,
+GC,GCV24,2024-09-26,,,historical,
+GC,GCZ24,2024-11-26,,,historical,
+GC,GCG25,2025-01-29,,,historical,
+GC,GCJ25,2025-03-26,,,historical,
+GC,GCM25,2025-05-28,,,historical,
+GC,GCQ25,2025-07-29,,,historical,
+GC,GCV25,2025-09-26,,,historical,
+GC,GCZ25,2025-11-25,,,historical,
+GC,GCG26,2026-01-28,,,historical,
+GC,GCJ26,2026-03-27,2026-03-27,,last,actual = expected (on-time roll); kept accessible ~3 weeks post-roll
+GC,GCM26,2026-05-28,,,front,Front contract as of 2026-05-12
+GC,GCQ26,2026-07-29,,,next,
+GC,GCV26,2026-09-28,,,upcoming,
+GC,GCZ26,2026-11-25,,,upcoming,
+GC,GCG27,2027-01-26,,,upcoming,estimated — recompute when closer
+GC,GCJ27,2027-03-26,,,upcoming,estimated — recompute when closer
+GC,GCM27,2027-05-25,,,upcoming,estimated — recompute when closer
+GC,GCQ27,2027-07-27,,,upcoming,estimated — recompute when closer
+GC,GCV27,2027-09-27,,,upcoming,estimated — recompute when closer
+GC,GCZ27,2027-11-25,,,upcoming,estimated — recompute when closer
+NQ,NQH24,2024-03-07,,,historical,
+NQ,NQM24,2024-06-06,,,historical,
+NQ,NQU24,2024-09-05,,,historical,
+NQ,NQZ24,2024-12-12,,,historical,
+NQ,NQH25,2025-03-06,,,historical,
+NQ,NQM25,2025-06-05,,,historical,
+NQ,NQU25,2025-09-04,,,historical,
+NQ,NQZ25,2025-12-11,,,historical,
+NQ,NQH26,2026-03-12,2026-03-16,,last,actual 4 days after expected; kept accessible ~3 weeks post-roll
+NQ,NQM26,2026-06-11,,,front,Front contract as of 2026-05-12
+NQ,NQU26,2026-09-10,,,next,
+NQ,NQZ26,2026-12-10,,,upcoming,
+NQ,NQH27,2027-03-11,,,upcoming,estimated — recompute when closer
+NQ,NQM27,2027-06-10,,,upcoming,estimated — recompute when closer
+NQ,NQU27,2027-09-09,,,upcoming,estimated — recompute when closer
+NQ,NQZ27,2027-12-09,,,upcoming,estimated — recompute when closer
