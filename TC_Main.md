@@ -4,6 +4,8 @@ Companion to `CLAUDE.md` (rules and conventions). This file is current state, op
 
 Last updated: 2026-05-12
 
+Source: [`github.com/Nickgit52/TCoding`](https://github.com/Nickgit52/TCoding) (private monorepo, since 2026-05-12)
+
 ---
 
 ## 1. Active Contracts
@@ -152,6 +154,7 @@ Latest at time of last TC_Main.md update: `Journal_2026-05-11.md` — pre-US RTH
 
 ## 11. Recent Decisions
 
+- **2026-05-12 (evening)** — TCoding put under git + pushed to GitHub. Monorepo at `github.com/Nickgit52/TCoding` (private). Eagle/.git and Pulse/.git (no remote, 3 commits each — trivial history) moved to TC_DISPOSE/2026-05-12/ before init. Root `.gitignore` added. Single initial commit captures the full Path B state.
 - **2026-05-12 (evening)** — `TC_Data.md` promoted to root (was `TC_REVIEW/TC_Data_DRAFT.md`). § 4 Active Datasets collapsed to a 4-bullet quick reference + pointer to TC_Data. CLAUDE.md § 3 + § 8 updated to reference TC_Data.
 - **2026-05-12 (late afternoon)** — Path B executed for Eagle. 6 scripts refactored to absolute paths (`build_history.py`, `eagle_server.py`, `eagle_start.py`, `build_candles.py`, `tick_explorer.py`, `explore_ml.py`). `find_scid()` order: Sierra → Pulse/Data/Scid_Data → TC_Sam128. Sync logic removed from Eagle (Pulse owns it). Eagle parquets moved from Storage/220_Offload/ to TC_Sam128/Ticks_Parquet/. Dangling Ticks_Parquet symlink moved to TC_DISPOSE. Awaiting smart-rebuild test from iTerm2.
 - **2026-05-12 (afternoon)** — Sam128 restructured. `TCoding/Raw_Scid` symlink removed entirely. Former `/Volumes/Sam128/220_Offload/` moved into `/Volumes/Sam128/Storage/220_Offload/`. 20 .scid files (full historical set + active overlap) consolidated into new `/Volumes/Sam128/TC_Sam128/` via `mv`. Eagle's `Ticks_Parquet` symlink now dangles (pre-move path); Eagle batch pipeline non-functional pending fix. Pulse verified intact end-to-end (`sync` + `maj` both passed; Pulse uses no Sam128 paths).
@@ -166,6 +169,7 @@ Latest at time of last TC_Main.md update: `Journal_2026-05-11.md` — pre-US RTH
 
 ## 12. Session Log
 
+- **2026-05-12 (evening)** — TCoding under git as monorepo, pushed to `github.com/Nickgit52/TCoding` (private). gh auth set up. Eagle/Pulse sub-repos discarded into TC_DISPOSE.
 - **2026-05-12 (evening)** — TC_Data.md promoted to root from TC_REVIEW. TC_Main § 4 collapsed to pointer. CLAUDE.md updated to reference TC_Data.
 - **2026-05-12 (late afternoon)** — Path B executed. 6 Eagle scripts refactored to absolute paths; sync logic removed (Pulse owns it now). Eagle parquets moved to TC_Sam128/Ticks_Parquet/. Dangling Ticks_Parquet symlink moved to TC_DISPOSE. All 6 scripts pass syntax check. Awaiting iTerm2 smart-rebuild test.
 - **2026-05-12 (afternoon)** — Sam128 restructure executed. `Raw_Scid` symlink removed, `220_Offload/` moved into `Storage/`, 20 .scid files consolidated into `TC_Sam128/`. Pulse end-to-end verified intact (`sync` + `maj` passed). Governance docs (CLAUDE.md, TC_Main.md, Eagle/note_ml.md) updated to reflect new Sam128 layout and flag the broken Eagle `Ticks_Parquet` symlink.
