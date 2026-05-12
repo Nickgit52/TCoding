@@ -230,6 +230,7 @@ When in doubt: propose, don't act.
 
 ## Change Log
 
+- 2026-05-12 (evening, late) — Documentation sync after Path B: TC_Data § 8 Disaster Recovery rewritten to reflect GitHub replication coverage; Pulse.md gained a Path B cross-pipeline note (Pulse now serves as Eagle's .scid cache); TC_JOURNAL/Journal_2026-05-12.md created documenting the day's Development arc. TCoding put under git as a monorepo and pushed to `github.com/Nickgit52/TCoding` (private).
 - 2026-05-12 (evening) — `TC_Data.md` promoted to root. § 3 Architecture gained a pointer to TC_Data for data topics. § 8 Folder Structure now lists TC_Data.md after Abbreviation.md.
 - 2026-05-12 (late afternoon) — Path B executed. Eagle scripts (6 files) refactored to absolute paths: `find_scid()` order = Sierra → Pulse/Data/Scid_Data → TC_Sam128. Sync logic removed from Eagle (Pulse owns it). Parquet output moved to `TC_Sam128/Ticks_Parquet/`. Dangling `Eagle/Data/Ticks_Parquet` symlink moved to TC_DISPOSE.
 - 2026-05-12 (afternoon) — Sam128 layout updated post-restructure. § 3 Architecture: Sam128 row rewritten to describe TC_Sam128 archive and flag broken Eagle `Ticks_Parquet` symlink. § 8 Folder Structure: `Raw_Scid/` line removed (symlink deleted); Eagle `Data/` line flagged for broken `Ticks_Parquet` symlink.

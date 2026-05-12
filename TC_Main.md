@@ -140,7 +140,7 @@ Sierra Chart (Windows / Parallels) writes `.scid` files to `/Volumes/[C] Windows
 
 All session journals live in `TC_JOURNAL/` (folder created 2026-05-12). At boot routine, the actual latest journal is whichever file in that folder sorts last by ISO date — do not rely on the filename below to be current.
 
-Latest at time of last TC_Main.md update: `Journal_2026-05-11.md` — pre-US RTH session, GC/NQ rotation hypothesis. Snapshots 1–25 from 11:09 to 14:30 UTC. Key takeaway: structural map BEFORE snapshot analysis. See `CLAUDE.md` § 7 and the `feedback_structural_map_first` memory.
+Latest at time of last TC_Main.md update: `Journal_2026-05-12.md` — Development + Pondering session (no live trading). The Sam128 restructure → Path B refactor → TC_Data.md creation → git/GitHub setup arc, plus key observations (Sierra retains no deep history; GCJ26 trickle ticks while NQH26 stays flat; smart-rebuild is per-contract not whole-file). See also `Journal_2026-05-11.md` for the prior session (pre-US RTH live trading, structural-map-first lesson).
 
 ---
 
@@ -154,6 +154,7 @@ Latest at time of last TC_Main.md update: `Journal_2026-05-11.md` — pre-US RTH
 
 ## 11. Recent Decisions
 
+- **2026-05-12 (evening, late)** — Documentation sync after Path B: TC_Data.md § 8 Disaster Recovery rewritten to credit GitHub coverage; Pulse.md gained a Path B cross-pipeline note (Pulse is now Eagle's .scid cache via `find_scid()`); `TC_JOURNAL/Journal_2026-05-12.md` created. Auto-memory `reference_tcoding_github_repo.md` added. CLAUDE.md Change Log + TC_Main § 9/§ 13 updated.
 - **2026-05-12 (evening)** — TCoding put under git + pushed to GitHub. Monorepo at `github.com/Nickgit52/TCoding` (private). Eagle/.git and Pulse/.git (no remote, 3 commits each — trivial history) moved to TC_DISPOSE/2026-05-12/ before init. Root `.gitignore` added. Single initial commit captures the full Path B state.
 - **2026-05-12 (evening)** — `TC_Data.md` promoted to root (was `TC_REVIEW/TC_Data_DRAFT.md`). § 4 Active Datasets collapsed to a 4-bullet quick reference + pointer to TC_Data. CLAUDE.md § 3 + § 8 updated to reference TC_Data.
 - **2026-05-12 (late afternoon)** — Path B executed for Eagle. 6 scripts refactored to absolute paths (`build_history.py`, `eagle_server.py`, `eagle_start.py`, `build_candles.py`, `tick_explorer.py`, `explore_ml.py`). `find_scid()` order: Sierra → Pulse/Data/Scid_Data → TC_Sam128. Sync logic removed from Eagle (Pulse owns it). Eagle parquets moved from Storage/220_Offload/ to TC_Sam128/Ticks_Parquet/. Dangling Ticks_Parquet symlink moved to TC_DISPOSE. Awaiting smart-rebuild test from iTerm2.
@@ -169,6 +170,7 @@ Latest at time of last TC_Main.md update: `Journal_2026-05-11.md` — pre-US RTH
 
 ## 12. Session Log
 
+- **2026-05-12 (evening, late)** — Documentation sync: TC_Data § 8 + Pulse.md + Journal_2026-05-12.md + CLAUDE.md change log + TC_Main § 9/§ 13 + auto-memory. Three pushed commits at session close: e419444 (initial), d939ff0 (source URL), 9ebf5d9 (doc sync).
 - **2026-05-12 (evening)** — TCoding under git as monorepo, pushed to `github.com/Nickgit52/TCoding` (private). gh auth set up. Eagle/Pulse sub-repos discarded into TC_DISPOSE.
 - **2026-05-12 (evening)** — TC_Data.md promoted to root from TC_REVIEW. TC_Main § 4 collapsed to pointer. CLAUDE.md updated to reference TC_Data.
 - **2026-05-12 (late afternoon)** — Path B executed. 6 Eagle scripts refactored to absolute paths; sync logic removed (Pulse owns it now). Eagle parquets moved to TC_Sam128/Ticks_Parquet/. Dangling Ticks_Parquet symlink moved to TC_DISPOSE. All 6 scripts pass syntax check. Awaiting iTerm2 smart-rebuild test.
@@ -187,7 +189,7 @@ Latest at time of last TC_Main.md update: `Journal_2026-05-11.md` — pre-US RTH
 - Compile `argonudp.cpp` if Pulse live UDP needs it.
 - Consider offloading `Pulse/Data/Ticks_Parquet_Training/` (1.7 GB) to Sam128 if Mac space gets tight.
 - Optimize structural-map pull (script that surfaces yesterday's POC/VAH/VAL + naked POCs + gap + IB extremes in one command at session start).
-- **Audit hardcoded paths and venv state** (queued 2026-05-12 — Pondering-mode task). Items to review: Eagle `.venv/` health and Python version alignment; 16 `.py` scripts with hardcoded path docstrings (Pulse `pulse_listen.py`, `pulse_sync_scid.py`, `pulse_institutional.py` carry full absolute paths); zsh aliases (`sync`, `live`, `bridge`, `vp`, `inst`, `market`, `maj`, `pr`, `prg`, `prn`, `pulse`) — verify each still works and points at the right cwd; `Eagle/Data/Ticks_Parquet → /Volumes/Sam128/...` symlink integrity; `argonudp.cpp` Sierra Chart study compile state and output paths; `Raw_Scid` reference in `build_history.py` line 39.
+- **Audit hardcoded paths and venv state** — largely completed 2026-05-12 via Path B refactor. Done: 6 Eagle scripts now on absolute paths to `/Volumes/Sam128/TC_Sam128/`; Pulse paths verified intact via `sync` + `maj` end-to-end; `Eagle/Data/Ticks_Parquet` symlink removed; `Raw_Scid` references eliminated; `sync` + `maj` zsh aliases tested. **Still pending**: Eagle `.venv/` health and Python version alignment check; `argonudp.cpp` Sierra Chart study compile state; individual verification of remaining aliases (`live`, `bridge`, `vp`, `inst`, `market`, `pr`, `prg`, `prn`, `pulse`) — most are components of `maj` so implicitly tested.
 
 ---
 
